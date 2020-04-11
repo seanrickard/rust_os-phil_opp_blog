@@ -3,6 +3,17 @@ use lazy_static::lazy_static;
 use spin::Mutex;
 use volatile::Volatile;
 
+#[cfg(test)]
+use crate::{serial_print, serial_println};
+
+lazy_static! {
+    pub static ref WRITER: Mutex<Writer> = Mutex::new(Writer {
+        column_position: 0,
+        color_code: ColorCode::new(Color::Yellow, Color::Black),
+        buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
+    });
+}
+
 #[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
@@ -123,15 +134,7 @@ impl Writer {
         }
     }
 }
-
-lazy_static! {
-    pub static ref WRITER: Mutex<Writer> = Mutex::new(Writer {
-        column_position: 0,
-        color_code: ColorCode::new(Color::Yellow, Color::Black),
-        buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
-    });
-}
-
+    
 #[macro_export]
 macro_rules! print {
     ($($arg:tt)*) => ($crate::vga_buffer::_print(format_args!($($arg)*)));
@@ -148,9 +151,6 @@ pub fn _print(args: fmt::Arguments) {
     use core::fmt::Write;
     WRITER.lock().write_fmt(args).unwrap();
 }
-
-#[cfg(test)]
-use crate::{serial_print, serial_println};
 
 #[test_case]
 fn test_println_simple() {
