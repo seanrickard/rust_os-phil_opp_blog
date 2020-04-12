@@ -1,5 +1,8 @@
 #![no_std]
 #![cfg_attr(test, no_main)]
+#![feature(const_fn)]
+#![feature(const_in_array_repeat_expressions)]
+#![feature(alloc_layout_extra)]
 #![feature(custom_test_frameworks)]
 #![test_runner(crate::test_runner)]
 #![feature(abi_x86_interrupt)]
